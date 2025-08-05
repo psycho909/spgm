@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>CGCS-充電管理-樓層</title>
+		<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+		<link href="../../img/favicon.ico" rel="icon" />
+		<link rel="stylesheet" href="../../css/common.css" />
+
+		<style>
+			/*
+	.floor_consumption_label {
+		font-size: 30px !important; 
+	}
+	*/
+			.ownership_percentage_header {
+				font-size: 30px;
+				font-weight: 900;
+				width: 100px;
+				height: 100px;
+				padding-top: 25px;
+			}
+
+			.status_table tbody tr {
+				height: 3rem;
+			}
+
+			.floor_caption {
+				font-size: 4em;
+			}
+
+			.floor_consumption {
+				font-size: 3em;
+			}
+
+			.block_title {
+				font-size: 1.2em;
+			}
+
+			.status_count {
+				font-size: 2.5em;
+			}
+
+			.floor_consumption_unit {
+				font-size: 1em !important;
+			}
+
+			.status_table thead {
+				display: none;
+			}
+		</style>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0/dist/chartjs-plugin-datalabels.min.js"></script>
+		<script src="../../cordova.js"></script>
+		<script src="../../script/lib/requirejs/require.js"></script>
+		<script>
+			require(["../../script/common/config.js"], function () {
+				require(["jquery", "bootstrap", "application", "../../script/page/index_floor.js", "lib/requirecss/css.min", "moment/moment-with-locales.min", "knob", "constant", "form-control", "jquery-serialize", "card-switcher", "card-expander", "adminlte", "localforage", "localforage-getitems", "sweetalert2", "select2", "jquery-i18n", "jquery-populate", "jquery-validate", "pace", "icheck", "daterangepicker", "chartjs", "select2-maxheight", "datatables-helper", "editForm", "jquery-validate-messages", "urls", "chartjs-datalabels", "util", "datatables.net", "app", "datatables.net-bs4", "datatables.net-responsive"], function () {
+					console.log("All modules loaded.");
+				});
+			});
+		</script>
+
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/select2/css/select2.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/adminlte/css/adminlte.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/sweetalert2/sweetalert2.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/font-awesome/css/all.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/ionicons/css/ionicons.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/pace-progress/themes/orange/pace-theme-flat-top.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/iCheck/square/blue.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/datatables-responsive/css/responsive.bootstrap4.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/daterangepicker/daterangepicker.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/chart.js/Chart.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/bootstrap-datatables/css/jquery.dataTables.min.css" />
+		<link type="text/css" rel="stylesheet" href="../../script/lib/plugins/datatables-bs4/css/dataTables.bootstrap4.css" />
+		<style type="text/css">
+			/* Chart.js */
+			@keyframes chartjs-render-animation {
+				from {
+					opacity: 0.99;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+			.chartjs-render-monitor {
+				animation: chartjs-render-animation 1ms;
+			}
+			.chartjs-size-monitor,
+			.chartjs-size-monitor-expand,
+			.chartjs-size-monitor-shrink {
+				position: absolute;
+				direction: ltr;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				overflow: hidden;
+				pointer-events: none;
+				visibility: hidden;
+				z-index: -1;
+			}
+			.chartjs-size-monitor-expand > div {
+				position: absolute;
+				width: 1000000px;
+				height: 1000000px;
+				left: 0;
+				top: 0;
+			}
+			.chartjs-size-monitor-shrink > div {
+				position: absolute;
+				width: 200%;
+				height: 200%;
+				left: 0;
+				top: 0;
+			}
+		</style>
+	</head>
+
+	<body id="index_floor" class="sidebar-mini layout-fixed layout-navbar-fixed dark-mode pace-done" height="auto">
+		<div class="pace pace-inactive">
+			<div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px)">
+				<div class="pace-progress-inner"></div>
+			</div>
+			<div class="pace-activity"></div>
+		</div>
+		<a href="#" class="back-to-top"><i class="fa fa-chevron-circle-up"></i></a>
+
+		<div class="wrapper">
+			<div id="header_sidebar_wrapper">
+				<nav class="main-header navbar navbar-expand navbar-dark" id="main_header">
+					<ul class="navbar-nav">
+						<li class="nav-item">
+							<a class="nav-link" data-widget="pushmenu" href="#" role="button">
+								<i class="nav-icon fas fa-bars"></i>
+							</a>
+						</li>
+
+						<!--
+		<li class="nav-item" id="nav_announcement_container">
+			<a href="#" class="nav-link text-danger" data-toggle="tooltip" id="nav_announcement_link"> 
+				<i class="ion ion-ios-paper-outline"></i>
+				<span class="badge badge-pill badge-info" id="nav_announcement_count"></span>
+			</a>
+		</li>
+
+		<li class="nav-item" id="nav_external_link_container">
+			<a href="#" id="nav_external_link_container_link">
+				<span></span>
+			</a>
+		</li>
+		-->
+
+						<li class="nav-item py-2">
+							<span class="h4 text-warning" id="header_community_name">璟都劍橋</span>
+							<span class="h4" id="header_application_name">社區智慧電網儲值系統</span>
+						</li>
+					</ul>
+
+					<ul class="nav navbar-nav ml-auto">
+						<li class="nav-item" id="nav_notification">
+							<a href="./notification.html" class="nav-link text-warning" data-toggle="tooltip" id="nav_notification_link" title="" data-original-title="訊息通知">
+								<i class="fa-sharp fa-thin fa-envelope fa-lg"></i>
+								<span class="badge badge-pill badge-warning" id="nav_notification_count">0</span>
+							</a>
+						</li>
+
+						<li class="nav-item d-none" id="nav_theme_switch">
+							<!--
+			<div class="form-check mt-1" id="theme_switch_container">
+				<input class="form-check-input" type="checkbox" id="theme_switch" hidden="hidden">&nbsp;
+				<label class="form-check-label" id="theme_switch_label" for="theme_switch"><i class="fa fa-2x fa-star-half-o"></i>
+				</label>
+			</div>
+			-->
+							<a href="#" id="theme_switch" class="nav-link text-orange"><i class="fa fa-lg fa-toggle-on"></i></a>
+						</li>
+
+						<li class="nav-item" id="nav_reload_page">
+							<a href="#" id="nav_reload_page_link" data-toggle="tooltip" class="nav-link text-success" title="" data-original-title="刷新"><i class="ion ion-ios-refresh"></i>&nbsp;<span></span></a>
+						</li>
+
+						<li class="nav-item">
+							<a href="logout" id="nav_logout_link" data-toggle="tooltip" class="nav-link text-danger" title="" data-original-title="登出"><i class="ion ion-ios-exit"></i>&nbsp;<span></span></a>
+						</li>
+
+						<!--  -->
+						<li class="nav-item" id="nav_user">
+							<a href="#" class="nav-link text-info" data-toggle="tooltip" data-widget="control-sidebar" data-slide="true" role="button" id="nav_user_link" title="" data-original-title="使用者資訊">
+								<i class="nav-icon ion ion-ios-person"></i>
+							</a>
+						</li>
+					</ul>
+				</nav>
+
+				<aside class="main-sidebar sidebar-dark-primary elevation-4">
+					<a href="http://125.228.20.167:3320/spgm/html/page/index.html" class="brand-link border-0">
+						<img src="../../img/logo.png" class="brand-image pt-1" />
+					</a>
+
+					<div class="sidebar">
+						<nav id="sidebar_container">
+							<ul id="sidebar_menu" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+								<li class="nav-item has-treeview menu-is-opening menu-open" menu_no="A">
+									<a class="nav-link" href="#"
+										><i class="text-primary fa-light fa-charging-station fa-lg"></i>&nbsp;
+										<p menu_no="A" id="parking"><span class="bg-light font-weight-bold px-1">A</span> 充電管理<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview" style="display: block">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/index_parking_garage.html"
+												>A1
+												<p menu_item_no="A1" id="index_parking_garage">&nbsp;充電管理</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link active" href="http://125.228.20.167:3320/spgm/html/page/index_floor.html"
+												>A2
+												<p menu_item_no="A2" id="index_floor">&nbsp;充電管理-樓層</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/floor_garage_state.html"
+												>A3
+												<p menu_item_no="A3" id="garage_state">&nbsp;車位狀態</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charging_record.html"
+												>A4
+												<p menu_item_no="A4" id="charging_record">&nbsp;充電紀錄</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/parking_record.html"
+												>A5
+												<p menu_item_no="A5" id="parking_record">&nbsp;停車紀錄</p></a
+											>
+										</li>
+									</ul>
+								</li>
+								<li class="nav-item has-treeview" menu_no="B">
+									<a class="nav-link" href="#"
+										><i class="text-orange fa-regular fa-memo-circle-info fa-lg"></i>&nbsp;
+										<p menu_no="B" id="info_basic"><span class="bg-light font-weight-bold px-1">B</span> 車位管理<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/community.html"
+												>B1
+												<p menu_item_no="B1" id="info_community">&nbsp;社區</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/parking_garage.html"
+												>B2
+												<p menu_item_no="B2" id="parking_garage">&nbsp;停車場</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/customer.html"
+												>B3
+												<p menu_item_no="B3" id="info_customer">&nbsp;住戶</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/garage.html"
+												>B4
+												<p menu_item_no="B4" id="info_garage">&nbsp;車位</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charging_pile.html"
+												>B5
+												<p menu_item_no="B5" id="info_charging_pile">&nbsp;充電樁</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/parking_card.html"
+												>B6
+												<p menu_item_no="B6" id="info_parking_card">&nbsp;感應卡</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/device.html"
+												>B8
+												<p menu_item_no="B8" id="info_device">&nbsp;設備</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charging_pile_model.html"
+												>B9
+												<p menu_item_no="B9" id="info_charging_pile_model">&nbsp;充電樁規格</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/contact.html"
+												>BA
+												<p menu_item_no="BA" id="info_contact">&nbsp;聯絡人</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/vender.html"
+												>BC
+												<p menu_item_no="BC" id="info_vender">&nbsp;廠商</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/construction_company.html"
+												>BD
+												<p menu_item_no="BD" id="info_construction_company">&nbsp;建設公司</p></a
+											>
+										</li>
+									</ul>
+								</li>
+								<li class="nav-item has-treeview" menu_no="C">
+									<a class="nav-link" href="#"
+										><i class="text-danger fas fa-server text-orange fa-lg"></i>&nbsp;
+										<p menu_no="C" id="device"><span class="bg-light font-weight-bold px-1">C</span> 設備管理<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/index_device.html"
+												>C1
+												<p menu_item_no="C1" id="device_index">&nbsp;設備管理</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/controller.html"
+												>C2
+												<p menu_item_no="C2" id="device_ems">&nbsp;EMS 控制器</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/card_reader.html"
+												>C3
+												<p menu_item_no="C3" id="device_card_reader">&nbsp;扣款讀卡機</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/power_meter.html"
+												>C4
+												<p menu_item_no="C4" id="device_power_meter">&nbsp;電錶</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charge_point.html"
+												>C5
+												<p menu_item_no="C5" id="device_ocpp">&nbsp;OCPP 充電樁</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/smart_power_meter.html"
+												>C6
+												<p menu_item_no="C6" id="device_smart_power_meter">&nbsp;多功能電錶</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/gateway.html"
+												>C7
+												<p menu_item_no="C7" id="device_gateway">&nbsp;閘道器</p></a
+											>
+										</li>
+									</ul>
+								</li>
+								<li class="nav-item has-treeview" menu_no="D">
+									<a class="nav-link" href="#"
+										><i class="text-success fa-solid fa-file-invoice-dollar fa-lg"></i>&nbsp;
+										<p menu_no="D" id="charge"><span class="bg-light font-weight-bold px-1">D</span> 財務管理<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charge_record.html"
+												>D1
+												<p menu_item_no="D1" id="charge_record">&nbsp;查詢計費</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/recharge.html"
+												>D2
+												<p menu_item_no="D2" id="charge_recharge">&nbsp;儲值</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/recharge_record.html"
+												>D3
+												<p menu_item_no="D3" id="charge_recharge_record">&nbsp;查詢儲值</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/meter_statistics_organization.html"
+												>D4
+												<p menu_item_no="D4" id="charge_billing">&nbsp;帳單</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/account_balance.html"
+												>D5
+												<p menu_item_no="D5" id="charge_balance">&nbsp;儲值餘額</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/report_log.html"
+												>D6
+												<p menu_item_no="D6" id="charge_bill_record">&nbsp;查詢帳單</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/manual_settlement.html"
+												>D7
+												<p menu_item_no="D7" id="charge_send_bill">&nbsp;發送帳單通知</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charging_price.html"
+												>D8
+												<p menu_item_no="D8" id="charge_charging_price">&nbsp;充電費率</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/charge_calculate.html"
+												>D9
+												<p menu_item_no="D9" id="charge_calculate">&nbsp;計算費用</p></a
+											>
+										</li>
+									</ul>
+								</li>
+								<li class="nav-item has-treeview" menu_no="Y">
+									<a class="nav-link" href="#"
+										><i class="text-warning fa-light fa-sitemap fa-lg"></i>&nbsp;
+										<p menu_no="Y" id="user"><span class="bg-light font-weight-bold px-1">Y</span> 帳號權限<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/organization.html"
+												>Y1
+												<p menu_item_no="Y1" id="user_organization">&nbsp;組織</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/role.html"
+												>Y2
+												<p menu_item_no="Y2" id="user_role">&nbsp;使用者群組</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/user.html"
+												>Y3
+												<p menu_item_no="Y3" id="user_maintenance">&nbsp;使用者</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/personal_information.html"
+												>Y4
+												<p menu_item_no="Y4" id="user_personal_information">&nbsp;使用者資料</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/user_member.html"
+												>Y5
+												<p menu_item_no="Y5" id="user_member">&nbsp;會員</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/registration.html"
+												>Y6
+												<p menu_item_no="Y6" id="registeration">&nbsp;註冊</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/registration_confirm.html"
+												>Y7
+												<p menu_item_no="Y7" id="registeration_confirm">&nbsp;確認註冊</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/blacklist.html"
+												>Y8
+												<p menu_item_no="Y8" id="info_black_list">&nbsp;黑名單</p></a
+											>
+										</li>
+									</ul>
+								</li>
+								<li class="nav-item has-treeview" menu_no="Z">
+									<a class="nav-link" href="#"
+										><i class="text-danger fa-light fa-gear-complex fa-lg"></i>&nbsp;
+										<p menu_no="Z" id="administration"><span class="bg-light font-weight-bold px-1">Z</span> 系統管理<i class="right fas fa-angle-left"></i></p
+									></a>
+									<ul class="nav nav-treeview">
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/community_setting.html"
+												>Z1
+												<p menu_item_no="Z1" id="administration_community_setting">&nbsp;社區設定</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/organization_calendar.html"
+												>Z2
+												<p menu_item_no="Z2" id="administration_organization_calendar">&nbsp;行事曆</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="#"
+												>Z3
+												<p menu_item_no="Z3" id="misc_user_record">&nbsp;使用紀錄</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/setting.html"
+												>Z4
+												<p menu_item_no="Z4" id="administration_setting">&nbsp;系統後台設定</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/code_group.html"
+												>Z5
+												<p menu_item_no="Z5" id="administration_code_group">&nbsp;代碼群組</p></a
+											>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" href="http://125.228.20.167:3320/spgm/html/page/code.html"
+												>Z6
+												<p menu_item_no="Z6" id="administration_code">&nbsp;代碼</p></a
+											>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</aside>
+
+				<script></script>
+			</div>
+
+			<div class="content-wrapper">
+				<div class="content-header pb-1">
+					<div class="container-fluid" style="opacity: 1">
+						<div class="row">
+							<div class="col-4">
+								<h3 class="p-1"><span id="title_section">充電管理-樓層</span></h3>
+							</div>
+							<div class="col-4">
+								<div class="d-flex justify-content-center">
+									<ul class="nav nav-pills floor_button_container">
+										<li class="nav-item mr-2"><a class="nav-link h5 active" floor="B1">B1 樓層</a></li>
+										<li class="nav-item mr-2"><a class="nav-link h5" floor="B2">B2 樓層</a></li>
+										<li class="nav-item mr-2"><a class="nav-link h5" floor="B3">B3 樓層</a></li>
+										<li class="nav-item mr-2"><a class="nav-link h5" floor="000">公共車位</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-4">
+								<div class="d-flex justify-content-end" id="title_operation_container">
+									<a class="btn text-info title_search_criteria"><i class="fa-solid fa-lg fa-search"></i>&nbsp;查詢</a><a class="btn title_back_to_list d-none"><i class="text-orange fa-solid fa-lg fa-reply"></i>&nbsp;</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="container-fluid px-3" id="content_area" style="opacity: 1">
+					<div class="row" id="criteria_area">
+						<div class="col-12">
+							<div class="card d-none">
+								<div class="card-header bg-primary d-none">
+									<div class="d-flex justify-content-between">
+										<h3 class="card-title" id="criteria_form_title"></h3>
+									</div>
+								</div>
+
+								<div class="card-body p-3">
+									<form class="form-horizontal" id="criteria_form" novalidate="novalidate">
+										<div class="form-row">
+											<div class="col-lg-4 col-md-4 col-sm-12">
+												<div class="form-group row has-feedback">
+													<label class="col-lg-3 col-md-3 col-sm-12 control-label text-md-right necessary" id="criteria_record_time_label" for="criteria_record_time">日期</label>
+													<div class="col-lg-8 col-md-8 col-sm-12">
+														<input type="text" class="form-control" id="criteria_record_time" name="recordTime" />
+														<span class="form-control-feedback"></span>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-lg-8 col-md-8 col-sm-12">
+												<div class="float-lg-right float-sm-left">
+													<button type="submit" class="btn btn-primary text-white" id="refresh"><i class="fas fa-search"></i>&nbsp;刷新</button>
+												</div>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div id="result_area">
+						<div class="template_container d-none">
+							<div class="knob_container d-none h5" id="floor_info_template">
+								<div class="floor_consumption_label p-2"></div>
+								<div class="p-1">
+									<span class="private_charge_point_count_label">固定車位充電樁</span>:&nbsp;
+									<span class="private_charge_point_count">62</span>
+								</div>
+								<div class="p-1">
+									<span class="shared_charge_point_count_label">公共車位充電樁</span>:&nbsp;
+									<span class="shared_charge_point_count">0</span>
+								</div>
+								<div class="mt-3 d-flex jsutify-content-center">
+									<input type="text" class="knob" value="0" />
+								</div>
+							</div>
+
+							<div class="d-none" id="floor_consumption_template">
+								<div class="card-deck h5">
+									<div class="card p-3 bg-white">
+										<div class="floor_consumption_latest_label"></div>
+										<div class="py-3">
+											<span class="floor_consumption floor_consumption_latest"></span>
+											<span class="floor_consumption_unit"></span>
+										</div>
+										<div>
+											<span class="floor_latest_compare_indicator"></span>
+											<span class="floor_latest_compare_percentage"></span>
+											<span class="floor_latest_compare_label"></span>
+										</div>
+									</div>
+
+									<div class="card p-3 bg-white">
+										<div class="floor_consumption_daily_label"></div>
+										<div class="py-3">
+											<span class="floor_consumption floor_consumption_daily"></span>
+											<span class="floor_consumption_unit"></span>
+										</div>
+										<div>
+											<span class="floor_daily_compare_indicator"></span>
+											<span class="floor_daily_compare_percentage"></span>
+											<span class="floor_daily_compare_label"></span>
+										</div>
+									</div>
+
+									<div class="card p-3 bg-white">
+										<div class="floor_consumption_monthly_label"></div>
+										<div class="py-3">
+											<span class="floor_consumption floor_consumption_monthly"></span>
+											<span class="floor_consumption_unit"></span>
+										</div>
+										<div>
+											<span class="floor_monthly_compare_indicator"></span>
+											<span class="floor_monthly_compare_percentage"></span>
+											<span class="floor_monthly_compare_label"></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="card-deck pt-3">
+									<div class="card p-3">
+										<div class="knob_container">
+											<div class="floor_voltage_guage_label p-2 h5"></div>
+											<div class="mt-3">
+												<input type="text" class="knob floor_voltage_guage" value="0" />
+											</div>
+										</div>
+									</div>
+
+									<div class="card p-3">
+										<div class="knob_container">
+											<div class="floor_power_guage_label p-2 h5"></div>
+											<div class="mt-3">
+												<input type="text" class="knob floor_power_guage" value="0" />
+											</div>
+										</div>
+									</div>
+
+									<div class="card p-3">
+										<div class="knob_container">
+											<div class="floor_consumption_guage_label p-2 h5"></div>
+											<div class="mt-3">
+												<input type="text" class="knob floor_consumption_guage" value="0" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="d-flex d-none mb-2" id="charge_point_status_floor_container_template">
+								<div class="charge_point_status_floor_label"></div>
+								<div class="d-flex flex-wrap shared_charge_point_status_container"></div>
+							</div>
+
+							<span class="p-1 m-1 rounded d-none" id="charge_point_status_template"></span>
+						</div>
+
+						<div id="container_template" class="d-none">
+							<div class="my-3 d-none"><span class="parking_garage_title h4 bg-warning p-1 rounded"></span></div>
+
+							<!-- Start of row #1 -->
+							<div class="row">
+								<!-- Start of col -->
+								<div class="col-lg-3 col-md-3 col-sm-12">
+									<div class="card">
+										<div class="card-body p-3">
+											<div class="border-bottom"><span class="floor_caption">B1</span></div>
+											<div class="d-flex justify-content-around p-3 floor_info_container"></div>
+										</div>
+									</div>
+								</div>
+								<!-- End of col -->
+
+								<!-- Start of col -->
+								<div class="col-lg-9 col-md-9 col-sm-12">
+									<div class="floor_consumption_container text-center"></div>
+								</div>
+								<!-- End of col -->
+							</div>
+							<!-- End of row #1 -->
+
+							<!-- Start of row #title -->
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-12">
+									<ul class="nav nav-tabs">
+										<li class="nav-item block_title">
+											<a class="nav-link active charge_point_status_title"></a>
+										</li>
+									</ul>
+								</div>
+
+								<div class="col-lg-6 col-md-6 col-sm-12">
+									<ul class="nav nav-tabs">
+										<li class="nav-item block_title">
+											<a class="nav-link active hour_consumption_title"></a>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<!-- End of row #title -->
+
+							<!-- Start of row #2 -->
+							<div class="row mt-3">
+								<!-- Start of col -->
+								<div class="col-lg-6 col-md-4 col-sm-12">
+									<div class="card-deck">
+										<div class="card">
+											<div class="card-body p-3 d-flex">
+												<div class="chart my-auto">
+													<canvas class="status_count_chart" style="width: 100%; height: 250px"></canvas>
+												</div>
+											</div>
+										</div>
+
+										<div class="card">
+											<div class="card-body">
+												<div class="table-responsive data_table_container">
+													<table class="table nowrap display status_table">
+														<tbody></tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End of col  align-items-center align-middle -->
+
+								<!-- Start of col -->
+								<div class="col-lg-6 col-md-4 col-sm-12">
+									<div class="card">
+										<div class="card-body p-3">
+											<div class="chart" style="height: 350px">
+												<canvas class="hour_consumption_chart"></canvas>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- End of col -->
+							</div>
+							<!-- End of row #2 -->
+						</div>
+
+						<div id="floor_container">
+							<div id="floor_container5" class="">
+								<div class="my-3 d-none"><span class="parking_garage_title h4 bg-warning p-1 rounded"></span></div>
+
+								<!-- Start of row #1 -->
+								<div class="row">
+									<!-- Start of col -->
+									<div class="col-lg-3 col-md-3 col-sm-12">
+										<div class="card">
+											<div class="card-body p-3">
+												<div class="border-bottom"><span class="floor_caption">B1</span></div>
+												<div class="d-flex justify-content-around p-3 floor_info_container">
+													<div class="knob_container h5" id="floor_info_24">
+														<div class="floor_consumption_label p-2">用電量 <span class="px-1 h5 bg-warning rounded">0.83</span> kW</div>
+														<div class="p-1">
+															<span class="private_charge_point_count_label">固定車位充電樁</span>:&nbsp;
+															<span class="private_charge_point_count">62</span>
+														</div>
+														<div class="p-1">
+															<span class="shared_charge_point_count_label">公共車位充電樁</span>:&nbsp;
+															<span class="shared_charge_point_count">0</span>
+														</div>
+														<div class="mt-3 d-flex jsutify-content-center">
+															<svg id="floor_consumption_gauge"></svg>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- End of col -->
+
+									<!-- Start of col -->
+									<div class="col-lg-9 col-md-9 col-sm-12">
+										<div class="floor_consumption_container text-center">
+											<div class="" id="floor_consumption">
+												<div class="card-deck h5">
+													<div class="card p-3 bg-white">
+														<div class="floor_consumption_latest_label">即時用電量</div>
+														<div class="py-3">
+															<span class="floor_consumption floor_consumption_latest">0.8</span>
+															<span class="floor_consumption_unit">kW</span>
+														</div>
+														<div>
+															<span class="floor_latest_compare_indicator"></span>
+															<span class="floor_latest_compare_percentage">-</span>
+															<span class="floor_latest_compare_label">與前日相比</span>
+														</div>
+													</div>
+
+													<div class="card p-3 bg-white">
+														<div class="floor_consumption_daily_label">當日累積用電量</div>
+														<div class="py-3">
+															<span class="floor_consumption floor_consumption_daily">26.4</span>
+															<span class="floor_consumption_unit">kW</span>
+														</div>
+														<div>
+															<span class="floor_daily_compare_indicator"></span>
+															<span class="floor_daily_compare_percentage">-</span>
+															<span class="floor_daily_compare_label">與前日相比</span>
+														</div>
+													</div>
+
+													<div class="card p-3 bg-white">
+														<div class="floor_consumption_monthly_label">當月累積用電量</div>
+														<div class="py-3">
+															<span class="floor_consumption floor_consumption_monthly">26.4</span>
+															<span class="floor_consumption_unit">kW</span>
+														</div>
+														<div>
+															<span class="floor_monthly_compare_indicator"></span>
+															<span class="floor_monthly_compare_percentage">-</span>
+															<span class="floor_monthly_compare_label">與前月相比</span>
+														</div>
+													</div>
+												</div>
+
+												<div class="card-deck pt-3">
+													<div class="card p-3">
+														<div class="knob_container">
+															<div class="floor_voltage_guage_label p-2 h5">電壓</div>
+															<div class="mt-3">
+																<div id="floor_voltage_guage"></div>
+															</div>
+														</div>
+													</div>
+
+													<div class="card p-3">
+														<div class="knob_container">
+															<div class="floor_power_guage_label p-2 h5">電流</div>
+															<div class="mt-3">
+																<div id="floor_power_guage"></div>
+															</div>
+														</div>
+													</div>
+
+													<div class="card p-3">
+														<div class="knob_container">
+															<div class="floor_consumption_guage_label p-2 h5">瓦特</div>
+															<div class="mt-3">
+																<div id="floor_consumption_guage"></div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- End of col -->
+								</div>
+								<!-- End of row #1 -->
+
+								<!-- Start of row #title -->
+								<div class="row">
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<ul class="nav nav-tabs">
+											<li class="nav-item block_title">
+												<a class="nav-link active charge_point_status_title">充電樁狀態</a>
+											</li>
+										</ul>
+									</div>
+
+									<div class="col-lg-6 col-md-6 col-sm-12">
+										<ul class="nav nav-tabs">
+											<li class="nav-item block_title">
+												<a class="nav-link active hour_consumption_title">分時用電量</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<!-- End of row #title -->
+
+								<!-- Start of row #2 -->
+								<div class="row mt-3">
+									<!-- Start of col -->
+									<div class="col-lg-6 col-md-4 col-sm-12">
+										<div class="card-deck">
+											<div class="card">
+												<div class="card-body p-3 d-flex">
+													<div class="chart my-auto">
+														<canvas id="status_count_chart" style="width: 100%; height: 250px"></canvas>
+													</div>
+												</div>
+											</div>
+
+											<div class="card">
+												<div class="card-body">
+													<div class="table-responsive data_table_container">
+														<div id="DataTables_Table_0_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+															<div class="row">
+																<div class="col-sm-12 col-md-6"></div>
+																<div class="col-sm-12 col-md-6"></div>
+															</div>
+															<div class="row">
+																<div class="col-sm-12">
+																	<table class="table nowrap display status_table dataTable no-footer" id="DataTables_Table_0">
+																		<tbody>
+																			<tr class="odd">
+																				<td><i class="p-3 fa-2x fas fa-bolt text-success"></i> <span class="h5">充電中</span></td>
+																				<td class="align-middle status_count">5</td>
+																			</tr>
+																			<tr class="even">
+																				<td><i class="p-3 fa-2x fas fa-cars text-orange"></i> <span class="h5">排隊中</span></td>
+																				<td class="align-middle status_count">0</td>
+																			</tr>
+																			<tr class="odd">
+																				<td><i class="p-3 fa-2x fas fa-power-off text-info"></i> <span class="h5">閒置</span></td>
+																				<td class="align-middle status_count">57</td>
+																			</tr>
+																			<tr class="even">
+																				<td><i class="p-3 fa-2x fa fa-circle-question text-warning"></i> <span class="h5">離線</span></td>
+																				<td class="align-middle status_count">0</td>
+																			</tr>
+																		</tbody>
+																		<thead>
+																			<tr>
+																				<th class="sorting_disabled" rowspan="1" colspan="1" style="width: 80px"></th>
+																				<th class="sorting_disabled align-middle status_count" rowspan="1" colspan="1" style="width: 120px"></th>
+																			</tr>
+																		</thead>
+																	</table>
+																</div>
+															</div>
+															<div class="row">
+																<div class="col-sm-12 col-md-5"></div>
+																<div class="col-sm-12 col-md-7"></div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- End of col  align-items-center align-middle -->
+
+									<!-- Start of col -->
+									<div class="col-lg-6 col-md-4 col-sm-12">
+										<div class="card">
+											<div class="card-body p-3">
+												<div class="chart" style="height: 350px">
+													<canvas id="hour_consumption_chart"></canvas>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- End of col -->
+								</div>
+								<!-- End of row #2 -->
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<aside id="control_sidebar" class="control-sidebar control-sidebar-dark">
+				<div class="p-3" id="control_sidebar_content">
+					<div id="user_info_container">
+						<p><span id="control_sidebar_user_name_label">使用者</span>:&nbsp;<span id="user_name" class="text-light">余二</span></p>
+						<p><span id="control_sidebar_organization_name_label">組織</span>:&nbsp;<span id="control_sidebar_organization_name" class="text-light">寶麒</span></p>
+						<p><span id="control_sidebar_community_name_label">社區</span>:&nbsp;<span id="control_sidebar_community_name" class="text-light">璟都劍橋</span></p>
+					</div>
+
+					<hr class="text-light" />
+
+					<form id="control_sidebar_form">
+						<div class="form-group" id="control_sidebar_organization_id_container">
+							<label class="control-label" id="control_sidebar_organization_id_label" for="control_sidebar_organization_id">組織</label>
+							<select id="control_sidebar_organization_id" class="select2 form-control select2-hidden-accessible" style="width: 100%" data-select2-id="control_sidebar_organization_id" tabindex="-1" aria-hidden="true">
+								<option value="0" data-select2-id="2">請選擇</option>
+								<option value="2" data-select2-id="3">TEUC - 寶麒</option>
+								<option value="3" data-select2-id="4">TEUCE - 寶麒-工程部</option>
+								<option value="6" data-select2-id="5">JJ - 嘉駿建設</option></select
+							><span class="select2 select2-container select2-container--bootstrap4" dir="ltr" data-select2-id="1" style="width: 100%"
+								><span class="selection"
+									><span class="select2-selection select2-selection--single" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-control_sidebar_organization_id-container"
+										><span class="select2-selection__rendered" id="select2-control_sidebar_organization_id-container" role="textbox" aria-readonly="true" title="TEUC - 寶麒"><span class="select2-selection__clear" title="Remove all items" data-select2-id="13">×</span>TEUC - 寶麒</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span
+								><span class="dropdown-wrapper" aria-hidden="true"></span
+							></span>
+						</div>
+
+						<div class="form-group" id="control_sidebar_community_id_container">
+							<label class="control-label" id="control_sidebar_community_id_label" for="control_sidebar_community_id">社區</label>
+							<select id="control_sidebar_community_id" class="select2 form-control select2-hidden-accessible" style="width: 100%" data-select2-id="control_sidebar_community_id" tabindex="-1" aria-hidden="true">
+								<option value="5" data-select2-id="8">CM240001-璟都劍橋</option>
+								<option value="2" data-select2-id="9">CM240002-德昌幸福家</option>
+								<option value="3" data-select2-id="10">CM240003-德昌金色大地</option>
+								<option value="1" data-select2-id="11">CM240005-冠德A19</option></select
+							><span class="select2 select2-container select2-container--bootstrap4" dir="ltr" data-select2-id="7" style="width: 100%"
+								><span class="selection"
+									><span class="select2-selection select2-selection--single" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-control_sidebar_community_id-container"
+										><span class="select2-selection__rendered" id="select2-control_sidebar_community_id-container" role="textbox" aria-readonly="true" title="CM240001-璟都劍橋"><span class="select2-selection__clear" title="Remove all items" data-select2-id="14">×</span>CM240001-璟都劍橋</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span
+								><span class="dropdown-wrapper" aria-hidden="true"></span
+							></span>
+						</div>
+
+						<div class="d-flex justify-content-center">
+							<button class="btn btn-primary" id="control_sidebar_confirm" type="submit"><i class="fas fa-check"></i>&nbsp;確定</button>
+							<!--
+			<button class="btn btn-warning" id="control_sidebar_reset" type="reset"><i class="fas fa-times"></i>&nbsp;</button>
+			-->
+						</div>
+					</form>
+				</div>
+
+				<script>
+					require(["../../script/page/control_sidebar.js"], function () {
+						console.log("control_sidebar.js loaded");
+					});
+				</script>
+			</aside>
+
+			<footer class="main-footer">
+				<div class="float-right hidden-xs" id="version">
+					<span id="version_label"><b>版本</b></span
+					>&nbsp;<span id="version_number">0.1</span>
+				</div>
+				<strong>
+					<span id="copyright">版權所有</span> © <span id="copyright_year">2024</span>
+					<a id="company_home_url" href="https://eunicom.com.tw">
+						<span id="company_name">台灣寶麒生活科技有限公司</span>
+					</a> </strong
+				>&nbsp;
+				<span id="copyright_declaration">保留全部權利</span>
+			</footer>
+		</div>
+		<!-- ./wrapper -->
+
+		<div class="daterangepicker ltr single auto-apply opensright">
+			<div class="ranges"></div>
+			<div class="drp-calendar left single" style="display: block">
+				<div class="calendar-table"></div>
+				<div class="calendar-time" style="display: none"></div>
+			</div>
+			<div class="drp-calendar right" style="display: none">
+				<div class="calendar-table"></div>
+				<div class="calendar-time" style="display: none"></div>
+			</div>
+			<div class="drp-buttons"><span class="drp-selected"></span><button class="cancelBtn btn btn-sm btn-default" type="button">取消</button><button class="applyBtn btn btn-sm btn-primary" disabled="disabled" type="button">確認</button></div>
+		</div>
+	</body>
+	<chatgpt-sidebar data-gpts-theme="light"></chatgpt-sidebar>
+</html>

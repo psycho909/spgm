@@ -1,0 +1,27 @@
+community_setting = 社區設定
+
+community_setting.information = 基本
+community_setting.settlement = 結帳
+community_setting.blacklist = 黑名單
+
+community_setting.name = 社區
+community_setting.update_time = 異動時間
+community_setting.from_time = 開始時間
+community_setting.to_time = 結束時間
+
+community_setting.settlement.date.from = 結帳日期-起
+community_setting.settlement.date.to = 結帳日期-迄
+
+community_setting.status = 狀態
+
+community_setting.balance.minimum = 可充電最低餘額
+community_setting.overtime.threshhold = 逾時停車門檻分鐘
+
+community_setting.blacklist.paying.amount = 未支付費用金額
+community_setting.blacklist.cancelled.times = 預約未停/取車次數
+community_setting.blacklist.overtime.minutes = 逾時停車累計分鐘
+
+community_setting.reserve = 預約
+community_setting.reserve.interval = 預約間隔分鐘
+community_setting.reserve.from.hours = 預約開始小時
+community_setting.reserve.within.hours = 可預約小時
