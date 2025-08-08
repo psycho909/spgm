@@ -405,9 +405,9 @@ td {
 			.main-sidebar {
 				width: vw(74);
 				&:hover {
-					width: vw(250);
+					width: vw(300);
 					.brand-link {
-						width: vw(250);
+						width: vw(300);
 					}
 				}
 				.brand-link {
@@ -425,17 +425,18 @@ td {
 	}
 	.main-sidebar {
 		@include media {
-			width: vw(250);
+			width: vw(300);
 		}
 		background-color: #312f2f;
 		.brand-link {
 			background-color: #312f2f;
 		}
 		.brand-link {
+			text-align: center;
 			@include media {
-				width: vw(250);
+				width: vw(300);
 				font-size: vw(20);
-				padding: vw(13) vw(8);
+				padding: vw(42) vw(8);
 			}
 			.pt-1,
 			.py-1 {
@@ -444,27 +445,43 @@ td {
 				}
 			}
 			.brand-image {
-				@include media {
-					margin-left: vw(12.8);
-					margin-right: vw(8);
-					margin-top: vw(-2);
-					max-height: vw(33);
-				}
+				float: none;
+				margin-left: 0;
+				margin-right: 0;
+				margin-top: 0;
+				padding-top: 0 !important;
+				display: inline-block;
 			}
 		}
 		.sidebar {
 			@include media {
-				margin-top: calc(vw(56) + 1px);
+				margin-top: calc(vw(118) + 1px);
 				padding-left: vw(8);
 				padding-right: vw(8);
 			}
 		}
 		#sidebar_menu {
+			.has-treeview {
+				& > .nav-link {
+					border-radius: 0;
+					display: flex;
+					align-items: center;
+					margin-bottom: 0 !important;
+					p {
+						position: relative;
+						width: 100%;
+						i {
+							right: 0;
+						}
+					}
+					@include media {
+						padding: vw(32) vw(16);
+					}
+				}
+			}
 			.nav-link {
 				width: 100%;
 				@include media {
-					padding: vw(8) vw(16);
-					border-radius: vw(4);
 					font-size: vw(16);
 				}
 				.pl-1,
@@ -502,7 +519,7 @@ td {
 		.main-header {
 			background-color: #1f1f1f;
 			padding: 0;
-			margin-left: vw(250);
+			margin-left: vw(300);
 		}
 	}
 	#header_community_name {
@@ -590,7 +607,7 @@ td {
 			margin-top: vw(124);
 			padding-left: vw(30);
 			padding-right: vw(30);
-			margin-left: vw(250);
+			margin-left: vw(300);
 		}
 		.content-header {
 			padding: 0 !important;
@@ -953,9 +970,30 @@ td {
 	.main-footer {
 		background-color: #1f1f1f;
 		@include media {
-			margin-left: vw(250);
+			margin-left: vw(300);
 			padding: vw(16);
 			font-size: vw(16);
 		}
 	}
+}
+
+.nav-sidebar .nav-link p {
+	font-size: 30px;
+}
+
+.nav-sidebar .nav-treeview .nav-link p {
+	font-size: 27px;
+}
+.nav-sidebar .menu-is-opening {
+	& > .nav-link {
+		background-color: #7ea2b2 !important;
+
+		p,
+		i {
+			color: #3f3c3b !important;
+		}
+	}
+}
+.nav-sidebar > .nav-item {
+	border-bottom: 1px solid #595858;
 }
