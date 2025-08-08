@@ -456,8 +456,8 @@ td {
 		.sidebar {
 			@include media {
 				margin-top: calc(vw(118) + 1px);
-				padding-left: vw(8);
-				padding-right: vw(8);
+				padding-left: 0;
+				padding-right: 0;
 			}
 		}
 		#sidebar_menu {
@@ -475,12 +475,14 @@ td {
 						}
 					}
 					@include media {
-						padding: vw(32) vw(16);
+						padding: vw(26) vw(16);
 					}
 				}
 			}
 			.nav-link {
 				width: 100%;
+				display: flex;
+				align-items: center;
 				@include media {
 					font-size: vw(16);
 				}
@@ -978,11 +980,11 @@ td {
 }
 
 .nav-sidebar .nav-link p {
-	font-size: 30px;
+	font-size: 28px;
 }
 
 .nav-sidebar .nav-treeview .nav-link p {
-	font-size: 27px;
+	font-size: 24px;
 }
 .nav-sidebar .menu-is-opening {
 	& > .nav-link {
@@ -996,4 +998,12 @@ td {
 }
 .nav-sidebar > .nav-item {
 	border-bottom: 1px solid #595858;
+}
+.nav-pills .nav-link {
+	&.active {
+		border-radius: 0;
+	}
+}
+#index_floor .main-sidebar #sidebar_menu .has-treeview > .nav-link p i {
+	top: 8px;
 }
