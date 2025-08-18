@@ -1087,11 +1087,6 @@ function getLineChart2(element) {
 	});
 }
 
-var data2 = [42, 38, 20];
-var pieChart = getPieChart2(document.querySelector("#status_count_chart"));
-pieChart.data.datasets[0].data = data2;
-pieChart.update();
-
 function getPieChart2(element) {
 	return new Chart(element.getContext("2d"), {
 		type: "pie",
@@ -1123,3 +1118,10 @@ function getPieChart2(element) {
 		}
 	});
 }
+
+setTimeout(() => {
+	var data2 = [42, 38, 20];
+	var pieChart = getPieChart2(document.querySelector("#status_count_chart"));
+	pieChart.data.datasets[0].data = data2;
+	pieChart.update();
+}, 0);
