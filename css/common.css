@@ -470,7 +470,7 @@ td {
 }
 @media screen and (max-width: 1920px) {
   #index_floor .main-sidebar #sidebar_menu .nav-link {
-    font-size: 0.8333333333vw;
+    font-size: 1.4583333333vw;
   }
 }
 @media screen and (max-width: 1920px) {
@@ -1062,31 +1062,25 @@ td {
     font-size: 0.8333333333vw;
   }
 }
-
-.nav-sidebar .nav-link p {
+#index_floor .nav-sidebar .nav-link p {
   font-size: 28px;
 }
-
-.nav-sidebar .nav-treeview .nav-link p {
+#index_floor .nav-sidebar .nav-treeview .nav-link {
   font-size: 28px;
 }
-
-.nav-sidebar .menu-is-opening > .nav-link {
+#index_floor .nav-sidebar .menu-is-opening > .nav-link {
   background-color: #7ea2b2 !important;
 }
-.nav-sidebar .menu-is-opening > .nav-link p,
-.nav-sidebar .menu-is-opening > .nav-link i {
+#index_floor .nav-sidebar .menu-is-opening > .nav-link p,
+#index_floor .nav-sidebar .menu-is-opening > .nav-link i {
   color: #3f3c3b !important;
 }
-
-.nav-sidebar > .nav-item {
+#index_floor .nav-sidebar > .nav-item {
   border-bottom: 1px solid #595858;
 }
-
-.nav-pills .nav-link.active {
+#index_floor .nav-pills .nav-link.active {
   border-radius: 0;
 }
-
 #index_floor .main-sidebar #sidebar_menu .has-treeview > .nav-link p i {
   top: 8px;
 }
