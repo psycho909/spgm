@@ -670,10 +670,8 @@ td {
 		}
 		#floor_consumption_gauge {
 			margin-top: 60px;
-			svg {
-				width: 100%;
-				margin: auto;
-			}
+			width: 100%;
+			margin: auto;
 			@include pc {
 				margin-top: vw(60);
 			}

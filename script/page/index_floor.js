@@ -839,14 +839,8 @@ function createGauge(container, opts = {}) {
 class Gauge {
 	static _gid = 0;
 
-	constructor(container, opt = {}) {
-		// 如果傳進來是 div，就自動建立 svg
-		if (container.tagName.toLowerCase() === "div") {
-			this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-			container.appendChild(this.svg);
-		} else {
-			this.svg = container;
-		}
+	constructor(svg, opt = {}) {
+		this.svg = svg;
 		this._defaults();
 		this.cfg = { ...this.def, ...opt };
 		this._build();
@@ -966,15 +960,205 @@ class Gauge {
 	}
 }
 
-let gauge = new Gauge(document.getElementById("floor_consumption_gauge"), {
-	R: 100,
-	stroke: 14,
-	value: 35,
-	gradient: [
-		{ offset: "0%", color: "#84c7ac" },
-		{ offset: "100%", color: "#14ae67" }
-	]
+class Gauge2 {
+	static _gid = 0;
+
+	constructor(canvas, opt = {}) {
+		this.canvas = canvas;
+		this.ctx = canvas.getContext("2d");
+		this._defaults();
+		this.cfg = { ...this.def, ...opt };
+		this._build();
+		this._update(this.cfg.value);
+
+		// Set up animation frame
+		this.animating = false;
+	}
+
+	setValue(v) {
+		this._update(Math.max(0, Math.min(100, v)));
+	}
+
+	animateTo(v, d = 1) {
+		this.tween?.kill();
+		this.tween = gsap.to(
+			{ p: this.cur },
+			{
+				p: v,
+				duration: d,
+				ease: "power1.inOut",
+				onUpdate: () => {
+					this._update(this.tween.targets()[0].p);
+					this._render();
+				}
+			}
+		);
+	}
+
+	update(opts) {
+		const keep = this.cur;
+		this.cfg = { ...this.cfg, ...opts };
+		this._build();
+		this._update(keep);
+		this._render();
+	}
+
+	clone(targetCanvas) {
+		// Create new gauge instance with same configuration
+		const newGauge = new Gauge(targetCanvas, { ...this.cfg });
+		newGauge.setValue(this.cur);
+		return newGauge;
+	}
+
+	copyCanvasContent(targetCanvas) {
+		// Direct copy of canvas pixel content
+		targetCanvas.width = this.canvas.width;
+		targetCanvas.height = this.canvas.height;
+		const targetCtx = targetCanvas.getContext("2d");
+		targetCtx.drawImage(this.canvas, 0, 0);
+	}
+
+	_defaults() {
+		this.def = {
+			R: 80,
+			stroke: 12,
+			color: "#00d4aa",
+			gradient: null,
+			value: 0,
+			bgExtra: 1.2,
+			gap: 0.35, // Reduced gap slightly
+			arrowScale: 0.2, // Reduced arrow scale slightly
+			valueDy: -0.15,
+			bgColor: "#e0e0e0",
+			textColor: "#333",
+			fontFamily: "Arial, sans-serif"
+		};
+	}
+
+	_build() {
+		const { R, stroke, gap, arrowScale, bgExtra } = this.cfg;
+
+		// Calculate padding needed for arrow and stroke
+		const arrowHeight = R * arrowScale;
+		const arrowRadius = R + stroke / 2 + R * gap + arrowHeight;
+		const strokePadding = (stroke * (1 + bgExtra)) / 2;
+
+		// Add padding to ensure nothing gets clipped
+		const padding = Math.max(arrowHeight, strokePadding) + 10;
+
+		const WH = R * 2 + padding * 2;
+		const H = R + padding * 2;
+
+		this.canvas.width = WH;
+		this.canvas.height = H;
+
+		this.Cx = WH / 2;
+		this.Cy = R + padding;
+
+		// Setup gradient if specified
+		if (this.cfg.gradient) {
+			const gradient = this.ctx.createLinearGradient(0, this.Cy, WH, this.Cy);
+			this.cfg.gradient.forEach((stop) => {
+				gradient.addColorStop(parseFloat(stop.offset.replace("%", "")) / 100, stop.color);
+			});
+			this.strokePaint = gradient;
+			this.arrowColor = this.cfg.gradient[this.cfg.gradient.length - 1].color;
+		} else {
+			this.strokePaint = this.cfg.color;
+			this.arrowColor = this.cfg.color;
+		}
+	}
+
+	_update(p) {
+		this.cur = p;
+		this._render();
+	}
+
+	_render() {
+		const { R, stroke, bgExtra, gap, arrowScale, valueDy, bgColor, textColor, fontFamily } = this.cfg;
+		const ctx = this.ctx;
+
+		// Clear canvas
+		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+		// Draw background arc
+		ctx.beginPath();
+		ctx.arc(this.Cx, this.Cy, R, Math.PI, 2 * Math.PI, false);
+		ctx.strokeStyle = bgColor;
+		ctx.lineWidth = stroke * (1 + bgExtra);
+		ctx.lineCap = "butt";
+		ctx.stroke();
+
+		// Draw progress arc
+		const startAngle = Math.PI;
+		const endAngle = Math.PI + (this.cur / 100) * Math.PI;
+
+		ctx.beginPath();
+		ctx.arc(this.Cx, this.Cy, R, startAngle, endAngle, false);
+
+		if (this.cfg.gradient) {
+			ctx.strokeStyle = this.strokePaint;
+		} else {
+			ctx.strokeStyle = this.cfg.color;
+		}
+
+		ctx.lineWidth = stroke;
+		ctx.lineCap = "butt";
+		ctx.stroke();
+
+		// Draw arrow
+		const θ = Math.PI - (this.cur / 100) * Math.PI;
+		const ρ = R + stroke / 2 + R * gap;
+		const x = this.Cx + ρ * Math.cos(θ);
+		const y = this.Cy - ρ * Math.sin(θ);
+		const deg = 270 - (θ * 180) / Math.PI;
+
+		ctx.save();
+		ctx.translate(x, y);
+		ctx.rotate((deg * Math.PI) / 180);
+
+		const ah = R * arrowScale;
+		ctx.beginPath();
+		ctx.moveTo(-ah * 0.45, 0);
+		ctx.lineTo(ah * 0.45, 0);
+		ctx.lineTo(0, -ah);
+		ctx.closePath();
+		ctx.fillStyle = this.arrowColor;
+		ctx.fill();
+
+		// Add arrow outline for better visibility
+		ctx.strokeStyle = this.arrowColor;
+		ctx.lineWidth = 1;
+		ctx.stroke();
+
+		ctx.restore();
+
+		// Draw text
+		ctx.fillStyle = textColor;
+		ctx.font = `${R * 0.45}px ${fontFamily}`;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText(Math.round(this.cur) + "%", this.Cx, this.Cy + valueDy * R);
+	}
+}
+// const gauges = [];
+// document.querySelectorAll(".floor_consumption_gauge").forEach((el, idx) => {
+// 	const g = new Gauge(el, {
+// 		R: 100,
+// 		stroke: 14,
+// 		value: idx === 0 ? 35 : 65,
+// 		gradient: [
+// 			{ offset: "0%", color: "#84c7ac" },
+// 			{ offset: "100%", color: "#14ae67" }
+// 		]
+// 	});
+// 	gauges.push(g);
+// });
+const gauge1 = new Gauge2(document.getElementById("floor_consumption_gauge"), {
+	value: 65,
+	color: "#00d4aa"
 });
+
 let g1 = createGauge(document.getElementById("floor_voltage_guage"), {
 	segments: 10,
 	colors: ["#0e6fb9", "#0e6fb9", "#0e6fb9", "#0e6fb9", "#f89b00", "#f89b00", "#f89b00", "#f89b00", "#ec3228", "#ec3228"],
