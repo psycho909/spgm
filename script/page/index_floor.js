@@ -839,8 +839,14 @@ function createGauge(container, opts = {}) {
 class Gauge {
 	static _gid = 0;
 
-	constructor(svg, opt = {}) {
-		this.svg = svg;
+	constructor(container, opt = {}) {
+		// 如果傳進來是 div，就自動建立 svg
+		if (container.tagName.toLowerCase() === "div") {
+			this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			container.appendChild(this.svg);
+		} else {
+			this.svg = container;
+		}
 		this._defaults();
 		this.cfg = { ...this.def, ...opt };
 		this._build();

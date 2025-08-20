@@ -670,8 +670,10 @@ td {
 		}
 		#floor_consumption_gauge {
 			margin-top: 60px;
-			width: 100%;
-			margin: auto;
+			svg {
+				width: 100%;
+				margin: auto;
+			}
 			@include pc {
 				margin-top: vw(60);
 			}
@@ -991,15 +993,20 @@ td {
 		}
 		.nav-sidebar .nav-link p {
 			font-size: 28px;
+			@include pc {
+				font-size: vw(28);
+			}
 		}
 
 		.nav-sidebar .nav-treeview .nav-link {
 			font-size: 28px;
+			@include pc {
+				font-size: vw(28);
+			}
 		}
 		.nav-sidebar .menu-is-opening {
 			& > .nav-link {
 				background-color: #7ea2b2 !important;
-
 				p,
 				i {
 					color: #3f3c3b !important;
